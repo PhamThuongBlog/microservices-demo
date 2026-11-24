@@ -21,14 +21,14 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                echo '📦 STEP 1/11: CHECKOUT — Lấy code từ GitHub...'
+                echo 'STEP 1/11: CHECKOUT — Lấy code từ GitHub...'
                 checkout scm
             }
         }
 
         stage('Build') {
             steps {
-                echo '🔨 STEP 2/11: BUILD — Biên dịch với Maven...'
+                echo 'STEP 2/11: BUILD — Biên dịch với Maven...'
                 dir('user-service') {
                     sh 'mvn clean compile'
                 }
@@ -37,7 +37,7 @@ pipeline {
 
         stage('Test') {
             steps {
-                echo '🧪 STEP 3/11: TEST — Chạy Unit Tests với JUnit 5...'
+                echo 'STEP 3/11: TEST — Chạy Unit Tests với JUnit 5...'
                 dir('user-service') {
                     sh 'mvn test'
                 }
@@ -53,7 +53,7 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-                echo '🔍 STEP 4/11: SCAN — Phân tích mã nguồn tĩnh với SonarQube...'
+                echo 'STEP 4/11: SCAN — Phân tích mã nguồn tĩnh với SonarQube...'
                 dir('user-service') {
                     withSonarQubeEnv('SonarQube') {
                         withCredentials([
@@ -76,7 +76,7 @@ pipeline {
 
         stage('Package') {
             steps {
-                echo '📦 STEP 5/11: PACKAGE — Đóng gói .jar...'
+                echo 'STEP 5/11: PACKAGE — Đóng gói .jar...'
                 dir('user-service') {
                     sh 'mvn package -DskipTests'
                     sh '''
@@ -93,7 +93,7 @@ pipeline {
 
         stage('Publish to Nexus') {
             steps {
-                echo '📤 STEP 6/11: PUBLISH — Đẩy artifact lên Nexus...'
+                echo 'STEP 6/11: PUBLISH — Đẩy artifact lên Nexus...'
                 dir('user-service') {
                     withCredentials([
                         usernamePassword(
@@ -130,7 +130,7 @@ pipeline {
 
         stage('Docker Build') {
             steps {
-                echo '🐳 CD STEP 7/11: BUILD IMAGE'
+                echo 'CD STEP 7/11: BUILD IMAGE'
                 dir('user-service') {
                     sh '''
                         docker build \
@@ -144,7 +144,7 @@ pipeline {
 
         stage('Docker Scan') {
             steps {
-                echo '🛡️ CD STEP 8/11: SCAN IMAGE'
+                echo 'CD STEP 8/11: SCAN IMAGE'
                 dir('user-service') {
                     sh '''
                         docker scout quickview ${DOCKER_IMAGE}:${DOCKER_TAG} || echo "Scout not available — skip"
@@ -155,7 +155,7 @@ pipeline {
 
         stage('Push to Registry') {
             steps {
-                echo '☁️ CD STEP 9/11: PUSH TO DOCKER HUB'
+                echo 'CD STEP 9/11: PUSH TO DOCKER HUB'
                 dir('user-service') {
                     withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials_1', usernameVariable: 'HUB_USER', passwordVariable: 'HUB_PASS')]) {
                         sh '''
@@ -170,7 +170,7 @@ pipeline {
 
         stage('Deploy Container') {
             steps {
-                echo '🚀 CD STEP 10/11: DEPLOY CONTAINER'
+                echo 'CD STEP 10/11: DEPLOY CONTAINER'
                 dir('user-service') {
                     sh '''
                         # Stop & remove container cũ nếu có
@@ -194,7 +194,7 @@ pipeline {
 
         stage('Verify Deploy') {
             steps {
-                echo '✅ CD STEP 11/11: VERIFY'
+                echo 'CD STEP 11/11: VERIFY'
                 dir('user-service') {
                     sh '''
                         echo "=== TEST LOGIN ==="
@@ -216,11 +216,11 @@ pipeline {
 
     post {
         success {
-            echo '🎉 PIPELINE SUCCESS — CI Pipeline hoàn thành!'
+            echo 'PIPELINE SUCCESS — CI Pipeline hoàn thành!'
             echo "CD PIPELINE SUCCESS — Deployed ${DOCKER_IMAGE}:${DOCKER_TAG}"
         }
         failure {
-            echo '💥 PIPELINE FAILED — Kiểm tra logs để debug!'
+            echo 'PIPELINE FAILED — Kiểm tra logs để debug!'
         }
         always {
             echo "Pipeline finished at: ${currentBuild.duration}ms"
