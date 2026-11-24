@@ -210,10 +210,12 @@ pipeline {
                 echo ' CD STEP 11/11: VERIFY'
                 dir('user-service') {
                     sh '''
-                        sleep 3
-                        curl -f http://host.docker.internal:18001/api/users/login || exit 1
+                        curl --retry 15 --retry-delay 2 --retry-all-errors -f \
+                          -X POST http://host.docker.internal:18001/api/users/login \
+                          -H "Content-Type: application/json" \
+                          -d '{"username":"admin","password":"123456"}'
                         echo ""
-                        curl http://host.docker.internal:18001/api/users/profile
+                        curl --retry 15 --retry-delay 2 --retry-all-errors -f http://host.docker.internal:18001/api/users/profile'
                     '''
                 }
             }
