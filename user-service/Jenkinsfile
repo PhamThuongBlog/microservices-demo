@@ -226,7 +226,7 @@ pipeline {
                             --volumes-from lab7-jenkins \
                             -w "$(pwd)" \
                             postman/newman:alpine \
-                            run user-service.postman_collection.json \
+                            run lab8_microservice.postman_collection.json \
                             --env-var "baseUrl=http://${CONTAINER_NAME}:18001" \
                             --reporters cli,junit \
                             --reporter-junit-export newman-reports/newman-report.xml
