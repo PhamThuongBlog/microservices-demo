@@ -9,6 +9,17 @@
   "item": [
     {
       "name": "get profile",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"Response time is less than 400ms\", function () {\r\n    pm.expect(pm.response.responseTime).to.be.below(500);\r\n});\r\n\r\npm.test(\"Json response is not empty\", function (){\r\n    pm.expect(pm.response).to.be.json;\r\n});\r\n\r\npm.test(\"Json response ROLE = ADMIN\", function (){\r\n    var jsonRes = pm.response.json();\r\n    pm.expect(jsonRes.role).to.eq(\"ADMIN\");\r\n})"
+            ]
+          }
+        }
+      ],
       "request": {
         "method": "GET",
         "header": [],
@@ -28,6 +39,17 @@
     },
     {
       "name": "logn",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"Response time is less than 400ms\", function () {\r\n    pm.expect(pm.response.responseTime).to.be.below(500);\r\n});\r\n\r\npm.test(\"Json response is not empty\", function (){\r\n    pm.expect(pm.response).to.be.json;\r\n});"
+            ]
+          }
+        }
+      ],
       "request": {
         "method": "POST",
         "header": [],
