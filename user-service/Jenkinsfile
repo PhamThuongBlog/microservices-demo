@@ -126,11 +126,11 @@ pipeline {
 
                                 mvn deploy:deploy-file \
                                     -s "$MAVEN_SETTINGS" \
-                                    -DgroupId=com.devops.lab7 \
-                                    -DartifactId=ci-demo \
-                                    -Dversion=1.0.0-SNAPSHOT \
+                                    -DgroupId=vhbtpm.k22a \
+                                    -DartifactId=user-service \
+                                    -Dversion=0.0.1-SNAPSHOT \
                                     -Dpackaging=jar \
-                                    -Dfile=target/ci-demo-1.0.0-SNAPSHOT.jar \
+                                    -Dfile=target/user-service-0.0.1-SNAPSHOT.jar \
                                     -Durl=http://lab7-nexus:8081/repository/maven-snapshots/ \
                                     -DrepositoryId=nexus
                             '''
