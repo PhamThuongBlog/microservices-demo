@@ -13,12 +13,10 @@
         "method": "GET",
         "header": [],
         "url": {
-          "raw": "http://localhost:18001/api/users/profile",
-          "protocol": "http",
+          "raw": "{{baseUrl}}/api/users/profile",
           "host": [
-            "localhost"
+            "{{baseUrl}}"
           ],
-          "port": "18001",
           "path": [
             "api",
             "users",
@@ -43,12 +41,10 @@
           }
         },
         "url": {
-          "raw": "http://localhost:18001/api/users/login",
-          "protocol": "http",
+          "raw": "{{baseUrl}}/api/users/login",
           "host": [
-            "localhost"
+            "{{baseUrl}}"
           ],
-          "port": "18001",
           "path": [
             "api",
             "users",
