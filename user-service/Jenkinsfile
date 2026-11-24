@@ -10,7 +10,7 @@ pipeline {
         NEXUS_REPO     = 'maven-snapshots'
         SONAR_HOST_URL = 'http://lab7-sonarqube:9000'
         
-        DOCKER_USER     = 'phamthuongdocker'   // ← ĐỔI thành username của bạn
+        DOCKER_USER     = 'phamthuongdocker'
         DOCKER_IMAGE    = "${DOCKER_USER}/devops-lab8-app-microservice"
         DOCKER_TAG      = "${env.BUILD_NUMBER}"
         CONTAINER_NAME  = 'lab8-cd-production'
@@ -29,7 +29,6 @@ pipeline {
         stage('Build') {
             steps {
                 echo '🔨 STEP 2/11: BUILD — Biên dịch với Maven...'
-
                 dir('user-service') {
                     sh 'mvn clean compile'
                 }
@@ -39,12 +38,10 @@ pipeline {
         stage('Test') {
             steps {
                 echo '🧪 STEP 3/11: TEST — Chạy Unit Tests với JUnit 5...'
-
                 dir('user-service') {
                     sh 'mvn test'
                 }
             }
-
             post {
                 success {
                     dir('user-service') {
@@ -57,20 +54,16 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 echo '🔍 STEP 4/11: SCAN — Phân tích mã nguồn tĩnh với SonarQube...'
-
                 dir('user-service') {
-
                     withSonarQubeEnv('SonarQube') {
-
                         withCredentials([
                             string(
                                 credentialsId: 'sonarqube-token',
                                 variable: 'SONAR_TOKEN'
                             )
                         ]) {
-
                             sh '''
-                                mvn sonar:sonar \
+                                mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
                                     -Dsonar.projectKey=devops-lab7 \
                                     -Dsonar.projectName="DevOps Lab 7 CI Demo" \
                                     -Dsonar.token="$SONAR_TOKEN"
@@ -84,16 +77,12 @@ pipeline {
         stage('Package') {
             steps {
                 echo '📦 STEP 5/11: PACKAGE — Đóng gói .jar...'
-
                 dir('user-service') {
-
                     sh 'mvn package -DskipTests'
-
                     sh '''
                         echo "=== ARTIFACT CREATED ==="
                         ls -lh target/*.jar
                     '''
-
                     archiveArtifacts(
                         artifacts: 'target/*.jar',
                         fingerprint: true
@@ -105,9 +94,7 @@ pipeline {
         stage('Publish to Nexus') {
             steps {
                 echo '📤 STEP 6/11: PUBLISH — Đẩy artifact lên Nexus...'
-
                 dir('user-service') {
-
                     withCredentials([
                         usernamePassword(
                             credentialsId: 'nexus-credentials',
@@ -115,21 +102,16 @@ pipeline {
                             passwordVariable: 'NEXUS_PASSWORD'
                         )
                     ]) {
-
                         configFileProvider([
                             configFile(
                                 fileId: 'maven-settings-nexus',
                                 variable: 'MAVEN_SETTINGS'
                             )
                         ]) {
-
                             sh '''
                                 echo "=== CHECK ARTIFACT ==="
-
                                 ls -lh target/
-
                                 echo "=== PUBLISH TO NEXUS ==="
-
                                 mvn deploy:deploy-file \
                                     -s "$MAVEN_SETTINGS" \
                                     -DgroupId=vhbtpm.k22a \
@@ -145,9 +127,10 @@ pipeline {
                 }
             }
         }
+
         stage('Docker Build') {
             steps {
-                echo ' CD STEP 7/11: BUILD IMAGE'
+                echo '🐳 CD STEP 7/11: BUILD IMAGE'
                 dir('user-service') {
                     sh '''
                         docker build \
@@ -161,42 +144,46 @@ pipeline {
 
         stage('Docker Scan') {
             steps {
-                echo ' CD STEP 8/11: SCAN IMAGE'
+                echo '🛡️ CD STEP 8/11: SCAN IMAGE'
                 dir('user-service') {
                     sh '''
-                        docker scout quickview ${DOCKER_IMAGE}:${DOCKER_TAG} || echo "  Scout not available — skip"
+                        docker scout quickview ${DOCKER_IMAGE}:${DOCKER_TAG} || echo "Scout not available — skip"
                     '''
-                    }
                 }
             }
+        }
 
         stage('Push to Registry') {
             steps {
-                echo ' CD STEP 9/11: PUSH TO DOCKER HUB'
+                echo '☁️ CD STEP 9/11: PUSH TO DOCKER HUB'
                 dir('user-service') {
                     withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials_1', usernameVariable: 'HUB_USER', passwordVariable: 'HUB_PASS')]) {
                         sh '''
                             echo "$HUB_PASS" | docker login -u "$HUB_USER" --password-stdin
-                        docker push ${DOCKER_IMAGE}:${DOCKER_TAG}
-                        docker push ${DOCKER_IMAGE}:latest
+                            docker push ${DOCKER_IMAGE}:${DOCKER_TAG}
+                            docker push ${DOCKER_IMAGE}:latest
                         '''
-                        }
                     }
                 }
+            }
         }
 
         stage('Deploy Container') {
             steps {
-                echo ' CD STEP 10/11: DEPLOY CONTAINER'
+                echo '🚀 CD STEP 10/11: DEPLOY CONTAINER'
                 dir('user-service') {
                     sh '''
                         # Stop & remove container cũ nếu có
                         docker stop ${CONTAINER_NAME} 2>/dev/null || true
                         docker rm ${CONTAINER_NAME} 2>/dev/null || true
 
-                        # Deploy container mới
+                        # Lấy tên network mà container Jenkins đang sử dụng
+                        JENKINS_NET=$(docker inspect lab7-jenkins --format='{{range $k,$v := .NetworkSettings.Networks}}{{$k}}{{end}}' | awk '{print $1}')
+
+                        # Deploy container mới vào cùng network với Jenkins
                         docker run -d \
                             --name ${CONTAINER_NAME} \
+                            --network ${JENKINS_NET} \
                             -p ${APP_PORT}:18001 \
                             --restart unless-stopped \
                             ${DOCKER_IMAGE}:${DOCKER_TAG}
@@ -207,15 +194,20 @@ pipeline {
 
         stage('Verify Deploy') {
             steps {
-                echo ' CD STEP 11/11: VERIFY'
+                echo '✅ CD STEP 11/11: VERIFY'
                 dir('user-service') {
                     sh '''
+                        echo "=== TEST LOGIN ==="
                         curl --retry 15 --retry-delay 2 --retry-all-errors -f \
-                          -X POST http://host.docker.internal:18001/api/users/login \
+                          -X POST http://${CONTAINER_NAME}:18001/api/users/login \
                           -H "Content-Type: application/json" \
                           -d '{"username":"admin","password":"123456"}'
+                        
                         echo ""
-                        curl --retry 15 --retry-delay 2 --retry-all-errors -f http://host.docker.internal:18001/api/users/profile'
+                        echo "=== TEST PROFILE ==="
+                        curl --retry 15 --retry-delay 2 --retry-all-errors -f \
+                          http://${CONTAINER_NAME}:18001/api/users/profile
+                        echo ""
                     '''
                 }
             }
@@ -223,16 +215,13 @@ pipeline {
     }
 
     post {
-
         success {
             echo '🎉 PIPELINE SUCCESS — CI Pipeline hoàn thành!'
             echo "CD PIPELINE SUCCESS — Deployed ${DOCKER_IMAGE}:${DOCKER_TAG}"
         }
-
         failure {
             echo '💥 PIPELINE FAILED — Kiểm tra logs để debug!'
         }
-
         always {
             echo "Pipeline finished at: ${currentBuild.duration}ms"
             cleanWs()
