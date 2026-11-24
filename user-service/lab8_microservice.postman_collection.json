@@ -1,0 +1,62 @@
+{
+  "info": {
+    "_postman_id": "3becb572-d1d8-4f5d-9be3-a34356c20a46",
+    "name": "lab8_microservice",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "44130623",
+    "_collection_link": "https://go.postman.co/collection/44130623-3becb572-d1d8-4f5d-9be3-a34356c20a46?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "get profile",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:18001/api/users/profile",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "18001",
+          "path": [
+            "api",
+            "users",
+            "profile"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "logn",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"username\":\"admin\",\r\n    \"password\":\"123456\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:18001/api/users/login",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "18001",
+          "path": [
+            "api",
+            "users",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}
