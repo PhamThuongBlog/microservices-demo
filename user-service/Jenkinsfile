@@ -251,16 +251,12 @@ pipeline {
                         mkdir -p zap-reports
                         chmod 777 zap-reports
 
-                        # Chạy ZAP Baseline Scan (-I để không làm fail pipeline nếu chỉ có cảnh báo mức Warning)
-                        docker run --rm \
+                        # Chạy ZAP với quyền root để tạo symlink /zap/wrk -> thư mục zap-reports của workspace
+                        docker run --rm -u root \
                             --network ${JENKINS_NET} \
                             --volumes-from lab7-jenkins \
-                            -w "$(pwd)/zap-reports" \
                             ghcr.io/zaproxy/zaproxy:stable \
-                            zap-baseline.py \
-                            -t http://${CONTAINER_NAME}:18001/api/users/profile \
-                            -r zap-report.html \
-                            -I
+                            bash -c "ln -sfn $(pwd)/zap-reports /zap/wrk && zap-baseline.py -t http://${CONTAINER_NAME}:18001/api/users/profile -r zap-report.html -I"
                     '''
                 }
             }
@@ -271,7 +267,7 @@ pipeline {
                     }
                 }
             }
-        }
+        }    
     }
 
     post {
