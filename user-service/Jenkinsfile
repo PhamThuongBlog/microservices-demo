@@ -211,9 +211,9 @@ pipeline {
                 dir('user-service') {
                     sh '''
                         sleep 3
-                        curl -f http://host.docker.internal:18001/health || exit 1
+                        curl -f http://host.docker.internal:18001/api/users/login || exit 1
                         echo ""
-                        curl http://host.docker.internal:18001/
+                        curl http://host.docker.internal:18001/api/users/profile
                     '''
                 }
             }
