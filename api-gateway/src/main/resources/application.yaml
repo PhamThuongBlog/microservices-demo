@@ -1,0 +1,26 @@
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      server:
+        webflux:
+          globalcors:
+            cors-configurations:
+              '[/**]':
+                allowedOrigins: "*"
+                allowedMethods: "*"
+                allowedHeaders: "*"
+          routes:
+            - id: user-service-route
+              uri: ${USER_SERVICE_URL:http://localhost:18001}
+              predicates:
+                - Path=/api/users/**
+            - id: catalog-service-route
+              uri: ${CATALOG_SERVICE_URL:http://localhost:18002}
+              predicates:
+                - Path=/api/catalog/**
+
+server:
+  port: 18000
+

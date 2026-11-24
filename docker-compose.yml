@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  user-service:
+    build: ./user-service
+    container_name: user-service
+    ports:
+      - "18001:18001"
+    networks:
+      - microservices-net
+
+  catalog-service:
+    build: ./catalog-service
+    container_name: catalog-service
+    ports:
+      - "18002:18002"
+    networks:
+      - microservices-net
+
+  api-gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+    ports:
+      - "18000:18000"
+    environment:
+      - USER_SERVICE_URL=http://user-service:18001
+      - CATALOG_SERVICE_URL=http://catalog-service:18002
+    depends_on:
+      - user-service
+      - catalog-service
+    networks:
+      - microservices-net
+  
+  frontend-app:
+    build: ./frontend-app
+    container_name: frontend-app
+    ports:
+      - "18080:18080"
+    depends_on:
+      - api-gateway
+    networks:
+      - microservices-net
+
+networks:
+  microservices-net:
+    driver: bridge
