@@ -11,7 +11,7 @@ pipeline {
         SONAR_HOST_URL = 'http://lab7-sonarqube:9000'
         
         DOCKER_USER     = 'phamthuongdocker'
-        DOCKER_IMAGE    = "${DOCKER_USER}/devops-lab8-app-microservice"
+        DOCKER_IMAGE    = "${DOCKER_USER}/devops-lab8-app-user-service"
         DOCKER_TAG      = "${env.BUILD_NUMBER}"
         CONTAINER_NAME  = 'lab8-cd-production'
         APP_PORT        = '18001'
