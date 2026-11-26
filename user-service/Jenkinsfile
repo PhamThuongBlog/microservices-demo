@@ -64,8 +64,8 @@ pipeline {
                         ]) {
                             sh '''
                                 mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
-                                    -Dsonar.projectKey=devops-lab7 \
-                                    -Dsonar.projectName="DevOps Lab 7 CI Demo" \
+                                    -Dsonar.projectKey=devops-lab8-userservice \
+                                    -Dsonar.projectName="DevOps LLab8 CD Demo microservice: user-service" \
                                     -Dsonar.token="$SONAR_TOKEN"
                             '''
                         }
